@@ -217,4 +217,3 @@ Vrac:
       date_modification: {  }
       date_export_creation: {  }
       motif_suppression: {  }
-      clause_reserve_propriete: { required: false }

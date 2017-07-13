@@ -15,7 +15,7 @@
 		</tr>
 	</thead>
 	<tbody>
-		<?php
+		<?php 
 			$counter = 0;
 			foreach ($vrac->declaration->getActifProduitsDetailsSorted() as $details):
 			foreach ($details as $detail):
@@ -36,7 +36,7 @@
 				<?php if ($detail->prix_unitaire): ?><?php echoFloat($detail->prix_unitaire) ?>&nbsp;&euro;/<?php if ($vrac->type_contrat == VracClient::TYPE_BOUTEILLE): ?>blle<?php else: ?>hl<?php endif; ?><?php endif; ?>
 			</td>
 		</tr>
-		<?php
+		<?php 
 			$counter++;  endforeach;
 			endforeach;
 		?>
@@ -69,16 +69,7 @@
 				<?php echo $form['conditions_particulieres']->render(array('class' => 'input_long')) ?>
 			</td>
 		</tr>
-		<?php if(isset($form['clause_reserve_propriete'])): ?>
-		<tr>
-			<td>
-				<?php echo $form['clause_reserve_propriete']->renderLabel() ?>
-			</td>
-			<td>
-			<?php echo $form['clause_reserve_propriete']->render() ?> <small style="font-size: 12px; color: #666; margin-left: 10px;">(Les modalités de cette clause sont indiquées au <a href="">verso du contrat</a>)</small>
-			</td>
-		</tr>
-		<?php endif; ?>
+
 	</tbody>
 </table>
 <?php include_partial('vrac/popupConfirmeValidation'); ?>
