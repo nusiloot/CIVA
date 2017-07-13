@@ -54,7 +54,7 @@ class DSSendBrouillonTask extends sfBaseTask
 
         $etablissement = CompteClient::getInstance()->find($arguments["id_etablissement"]);
 
-        if($etablissement->hasDroit(Roles::TELEDECLARATION_DS_PROPRIETE) && !$etablissement->hasDroit(Roles::TELEDECLARATION_DS_NEGOCE)) {
+        if($etablissement->hasDroit(Roles::TELEDECLARATION_DS_PROPRIETE)) {
 
             $this->executeSendMail($etablissement, DSCivaClient::TYPE_DS_PROPRIETE, $options['dryrun']);
         }
@@ -77,21 +77,21 @@ class DSSendBrouillonTask extends sfBaseTask
 
         if(!$etablissement->hasLieuxStockage() && !$etablissement->isAjoutLieuxDeStockage()) {
 
-            echo $type_ds.";ERROR;PAS DE LIEU DE STOCKAGE;".$compte->_id."\n";
+            echo $type_ds.";ERROR;PAS DE LIEU DE STOCKAGE;".$etablissement->_id."\n";
             return;
         }
 
 
-        $previousDateStock=(preg_replace("/[0-9]{2}$/", "", $this->periode)-1)."-".preg_replace("/^[0-9]{4}/", "", $this->periode)."-31";
-        $ds = DSCivaClient::getInstance()->getDSPrincipale($tiers, $previousDateStock);
+        $previousPeriode = (preg_replace("/[0-9]{2}$/", "", $this->periode)-1).preg_replace("/^[0-9]{4}/", "", $this->periode);
+        $ds = DSCivaClient::getInstance()->findPrincipaleByEtablissementAndPeriode($type_ds, $tiers, $previousPeriode);
         $teledeclarant = ($ds && (!$ds->exist("date_depot_mairie") || !$ds->get("date_depot_mairie")));
         $recuperationDoc = ($type_ds == DSCivaClient::TYPE_DS_PROPRIETE);
         $email = $etablissement->getEmailTeledeclaration();
 
-        $log = sprintf("%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s", $type_ds, $teledeclarant, $recuperationDoc, !is_null($ds), $email, $tiers->cvi, $tiers->num_interne, $tiers->famille, $tiers->raison_sociale, $tiers->commune, $tiers->_id);
+        $log = sprintf("%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s", $type_ds, $teledeclarant, $recuperationDoc, !is_null($ds), $email, $tiers->cvi, $tiers->num_interne, $tiers->famille, $tiers->raison_sociale, $tiers->commune, $tiers->id_societe, $tiers->_id);
 
         if(!$email || $dryrun) {
-            echo $log.";".boolval($email)."\n";
+            echo $log.";".boolval($email).";0\n";
             return;
         }
 
@@ -117,11 +117,11 @@ class DSSendBrouillonTask extends sfBaseTask
         try {
             $this->getMailer()->send($message);
         } catch (Exception $e) {
-            echo $log.";0;".$e->getMessage()."\n";
+            echo $log.";1;0;".$e->getMessage()."\n";
             return false;
         }
 
-        echo $log.";1\n";
+        echo $log.";1;1\n";
 
         sleep(1);
     }
