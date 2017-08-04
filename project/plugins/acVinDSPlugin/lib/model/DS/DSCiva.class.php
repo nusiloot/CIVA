@@ -9,7 +9,7 @@
  * Description of class DSCiva
  * @author mathurin
  */
-class DSCiva extends DS implements IUtilisateursDocument, IDRMEdiExportable {
+class DSCiva extends DS implements IUtilisateursDocument {
 
     protected $utilisateurs_document = null;
 
@@ -768,24 +768,19 @@ class DSCiva extends DS implements IUtilisateursDocument, IDRMEdiExportable {
         return $this->_set('date_stock', $date_stock);
     }
 
-    public function getDRMEdiProduitRows(DRMExportCsvEdi $edi){
+    public function getDRMEdiProduitRows(DRMGenerateCSV $drmGenerateCSV){
       $lignesEdi = "";
+      $isFirstDRMCampagne = ($drmGenerateCSV->getPeriode()-1 == $this->getPeriode());
+
       foreach ($this->getProduits() as $hashProduit => $produit) {
-        $lignesEdi.= $edi->createRowStockNullProduit($produit);
+        $lignesEdi.= $drmGenerateCSV->createRowStockProduitFromDS($produit,$isFirstDRMCampagne);
       }
       return $lignesEdi;
     }
 
-    public function getDRMEdiMouvementRows(DRMExportCsvEdi $edi){
-      $lignesEdi = "";
-      foreach ($this->getProduits() as $hashProduit => $produit) {
-
-        /**
-         * Attention ! ICI on ne prend pas encore les VT et les SGN
-         */
-        $lignesEdi.= $edi->createRowMouvementProduitDetail($produit,"stocks_debut","initial",$produit->getVolumeNormal());
-        $lignesEdi.= $edi->createRowMouvementProduitDetail($produit,"stocks_fin","final",$produit->getVolumeNormal());
-      }
-      return $lignesEdi;
+    public function getDRMEdiMouvementRows(DRMGenerateCSV $drmGenerateCSV){
+      return "";
     }
+
+
 }

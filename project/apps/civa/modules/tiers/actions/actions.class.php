@@ -114,10 +114,30 @@ class tiersActions extends sfActions {
         }
     }
 
+    public function executeNav(sfWebRequest $request) {
+        $compte = null;
+        if($request->getParameter('compte')) {
+            $compte = CompteClient::getInstance()->findByLogin($request->getParameter('compte'));
+        }
+
+        if(!$compte) {
+
+            return $this->renderText(null);
+        }
+
+        $blocs = $this->buildBlocs($compte);
+
+        return $this->renderPartial("tiers/onglets", array("compte" => $compte, "blocs" => $blocs, "active" => "drm", 'absolute' => true));
+    }
+
     protected function buildBlocs($compte) {
         $blocs = array();
         if($compte->hasDroit(Roles::TELEDECLARATION_DR)) {
             $blocs[Roles::TELEDECLARATION_DR] = $this->generateUrl('mon_espace_civa_dr_compte', $compte);
+        }
+        $url_drm = sfConfig::get("app_giilda_url_drm",false);
+        if($compte->hasDroit(Roles::TELEDECLARATION_DRM) && $url_drm) {
+            $blocs[Roles::TELEDECLARATION_DRM] = sprintf($url_drm, $compte->identifiant);
         }
 
         if($compte->hasDroit(Roles::TELEDECLARATION_DR_ACHETEUR)) {
@@ -133,7 +153,7 @@ class tiersActions extends sfActions {
         }
 
         if($compte->hasDroit(Roles::TELEDECLARATION_VRAC) && !isset($blocs[$compte->hasDroit(Roles::TELEDECLARATION_VRAC)])) {
-            $tiersVrac = VracClient::getInstance()->getEtablissements($this->compte->getSociete());
+            $tiersVrac = VracClient::getInstance()->getEtablissements($compte->getSociete());
 
             if($tiersVrac instanceof sfOutputEscaperArrayDecorator) {
                 $tiersVrac = $tiersVrac->getRawValue();

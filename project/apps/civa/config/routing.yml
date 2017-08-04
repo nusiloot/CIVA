@@ -693,6 +693,14 @@ dr_xml:
 
 # *********** DR ***********
 
+# *********** import DRM ***********
+
+drm_create_from_documents:
+  url: /drm-reprise/:identifiant/creation-documents/:periode
+  param: {module: drm, action: createEdiFileFromDocuments}
+
+# *********** import DRM fin ***********
+
 csv_comptes:
   url: /comptes/csv
   param: {module: dr_export, action: comptesCSV}
@@ -775,6 +783,14 @@ task_run:
   requirements:
     namespace: '[a-zA-Z0-9_-]+'
     slug: '[a-zA-Z0-9_-]+'
+
+header:
+  url: /header
+  param: {module: global, action: header}
+
+nav:
+  url: /nav
+  param: {module: tiers, action: nav}
 
 default_index:
   url:   /:module
